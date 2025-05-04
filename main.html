@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>for you</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #ffffff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: #ff3366;
+            text-align: center;
+            opacity: 0;
+            animation: fadeInOut 1.5s forwards;
+        }
+        
+        .content-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 90%;
+            max-width: 1200px;
+            opacity: 0;
+            display: none;
+        }
+        
+        .image-container {
+            flex: 0 0 40%;
+            padding-right: 30px;
+        }
+        
+        .image-container img {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .long-message {
+            flex: 0 0 60%;
+            font-size: 1.8rem;
+            line-height: 1.5;
+            color: #e6005c;
+            text-align: left;
+        }
+        
+        .thank-you {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            color: #ff007f;
+            text-align: center;
+            opacity: 0;
+            display: none;
+        }
+        
+        .heart {
+            position: absolute;
+            bottom: -100px;
+            transform: translateX(-50%);
+            opacity: 0;
+            animation-name: float-heart;
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+            z-index: -1; /* Để trái tim hiển thị phía sau văn bản */
+        }
+        
+        .heart:before,
+        .heart:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            width: 30px;
+            height: 45px;
+            border-radius: 30px 30px 0 0;
+            background-color: currentColor;
+        }
+        
+        .heart:before {
+            left: 30px;
+            transform: rotate(-45deg);
+            transform-origin: 0 100%;
+        }
+        
+        .heart:after {
+            left: 0;
+            transform: rotate(45deg);
+            transform-origin: 100% 100%;
+        }
+        
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+            }
+            20% {
+                opacity: 1;
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+        
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes float-heart {
+            0% {
+                bottom: -10%;
+                opacity: 0;
+                transform: translateX(-50%) scale(0.3);
+            }
+            20% {
+                opacity: 0.5;
+            }
+            80% {
+                opacity: 0.5;
+            }
+            100% {
+                bottom: 110%;
+                opacity: 0;
+                transform: translateX(-50%) scale(0.3) rotate(20deg);
+            }
+        }
+        
+        /* Điều chỉnh bố cục cho màn hình nhỏ hơn */
+        @media (max-width: 768px) {
+            .content-container {
+                flex-direction: column;
+                width: 95%;
+            }
+            
+            .image-container {
+                flex: 0 0 auto;
+                padding-right: 0;
+                padding-bottom: 20px;
+                width: 80%;
+            }
+            
+            .long-message {
+                flex: 0 0 auto;
+                font-size: 1.4rem;
+                text-align: center;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <div class="message" id="first-message">Hello 钧译,<br>心上人</div>
+        
+        <div class="content-container" id="content-container">
+            <div class="image-container">
+                <img src="img.jpg" alt="Hình ảnh đặc biệt">
+            </div>
+            <div class="long-message" id="second-message">
+                这是我送给你的第一份礼物，但肯定不会是最后一份。希望你永远快乐幸福，从今以后我会一直陪伴在你身边，所以不要再为过去的事情难过了。祝你有个美好的一天！爱你，宝贝！
+            </div>
+        </div>
+        
+        <div class="thank-you" id="thank-you">Cảm ơn rất nhiều!</div>
+    </div>
+    
+    <audio id="background-music" src="music.mp3"></audio>
+
+    <script>
+        const container = document.getElementById('container');
+        const firstMessage = document.getElementById('first-message');
+        const contentContainer = document.getElementById('content-container');
+        const thankYou = document.getElementById('thank-you');
+        const audio = document.getElementById('background-music');
+        
+        const colors = [
+            '#ff0000', '#ff3366', '#ff66cc', '#ff99cc', '#ff5050',
+            '#ff1493', '#e6005c', '#ff69b4', '#ff007f', '#ff38d1'
+        ];
+        
+        const heartSizes = [20, 30, 40, 50, 60];
+        const totalHearts = 30;
+        
+        // Bắt đầu tạo trái tim ngay lập tức
+        for (let i = 0; i < totalHearts; i++) {
+            createHeart();
+        }
+        
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            
+            // Chọn màu ngẫu nhiên
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            heart.style.color = randomColor;
+            
+            // Kích thước ngẫu nhiên
+            const randomSize = heartSizes[Math.floor(Math.random() * heartSizes.length)];
+            heart.style.width = `${randomSize}px`;
+            heart.style.height = `${randomSize}px`;
+            
+            // Vị trí ngang ngẫu nhiên
+            const randomLeft = Math.random() * 100;
+            heart.style.left = `${randomLeft}%`;
+            
+            // Thời gian animation ngẫu nhiên từ 8-15 giây
+            const animationDuration = 8 + Math.random() * 7;
+            heart.style.animationDuration = `${animationDuration}s`;
+            
+            // Độ trễ ban đầu ngẫu nhiên
+            const animationDelay = Math.random() * 5;
+            heart.style.animationDelay = `${animationDelay}s`;
+            
+            container.appendChild(heart);
+            
+            // Xóa trái tim sau khi animation kết thúc để tránh quá nhiều phần tử DOM
+            setTimeout(() => {
+                heart.remove();
+                createHeart();
+            }, (animationDuration + animationDelay) * 1000);
+        }
+        
+        // Xử lý trường hợp ảnh không tải được
+        const imageElement = document.querySelector('.image-container img');
+        imageElement.onerror = function() {
+            console.error("Không thể tải ảnh img.jpg");
+            // Thay thế bằng một thông báo hoặc ảnh mặc định
+            this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f8f8f8'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='20' text-anchor='middle' fill='%23999'%3EHình ảnh không khả dụng%3C/text%3E%3C/svg%3E";
+        };
+        
+        // Sau 1.5 giây, hiển thị đoạn văn bản thứ hai và phát nhạc
+        setTimeout(() => {
+            // Ẩn thông điệp đầu tiên
+            firstMessage.style.display = 'none';
+            
+            // Hiển thị nội dung (ảnh + văn bản)
+            contentContainer.style.display = 'flex';
+            contentContainer.style.animation = 'fadeIn 2s forwards';
+            
+            // Phát nhạc
+            audio.play().catch(error => {
+                console.error("Không thể phát nhạc tự động:", error);
+                alert("Vui lòng nhấn vào trang để phát nhạc");
+                // Thêm event listener để người dùng có thể nhấn vào trang để phát nhạc
+                document.body.addEventListener('click', function() {
+                    audio.play();
+                }, { once: true });
+            });
+            
+            // Kiểm tra độ dài của bài hát và hiển thị lời cảm ơn khi kết thúc
+            audio.addEventListener('loadedmetadata', function() {
+                const songDuration = audio.duration * 1000; // Chuyển đổi từ giây sang mili giây
+                
+                // Hiển thị lời cảm ơn khi bài hát gần kết thúc (20 giây trước khi kết thúc)
+                if (songDuration > 20000) {
+                    setTimeout(() => {
+                        thankYou.style.display = 'block';
+                        thankYou.style.animation = 'fadeIn 3s forwards';
+                    }, songDuration - 20000);
+                } else {
+                    // Nếu bài hát quá ngắn, hiển thị lời cảm ơn sau một khoảng thời gian nhất định
+                    setTimeout(() => {
+                        thankYou.style.display = 'block';
+                        thankYou.style.animation = 'fadeIn 3s forwards';
+                    }, songDuration / 2);
+                }
+            });
+            
+            // Phòng trường hợp bài hát không load được, hiển thị lời cảm ơn sau 2 phút
+            setTimeout(() => {
+                if (getComputedStyle(thankYou).opacity == 0) {
+                    thankYou.style.display = 'block';
+                    thankYou.style.animation = 'fadeIn 3s forwards';
+                }
+            }, 120000);
+        }, 1500);
+    </script>
+</body>
+</html>
