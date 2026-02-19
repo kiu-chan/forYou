@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>致你</title>
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 50% 60%, #ffd6e7 0%, #ffb3cc 50%, #ff8fab 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Ma Shan Zheng', 'ZCOOL XiaoWei', 'STKaiti', serif;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ── Bokeh ── */
+    .bokeh { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .dot {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.6);
+      animation: twinkle ease-in-out infinite;
+    }
+    @keyframes twinkle {
+      0%,100% { opacity: 0.1; transform: scale(0.8); }
+      50%      { opacity: 0.9; transform: scale(1.3); }
+    }
+
+    /* ── Floating hearts ── */
+    .heart-container { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .heart {
+      position: absolute;
+      bottom: -60px;
+      animation: floatUp linear infinite;
+      opacity: 0;
+      user-select: none;
+      filter: drop-shadow(0 0 6px rgba(255,100,150,0.7));
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0) rotate(-15deg) scale(0.7); opacity: 0; }
+      8%   { opacity: 1; }
+      85%  { opacity: 0.5; }
+      100% { transform: translateY(-115vh) rotate(20deg) scale(1.2); opacity: 0; }
+    }
+
+    /* ── Ripple ── */
+    .ripple {
+      position: fixed; border-radius: 50%;
+      border: 3px solid rgba(255,100,150,0.6);
+      pointer-events: none;
+      animation: rippleOut 0.9s ease-out forwards;
+      z-index: 999;
+    }
+    @keyframes rippleOut {
+      from { width:0; height:0; opacity:1; transform:translate(-50%,-50%) scale(0); }
+      to   { width:300px; height:300px; opacity:0; transform:translate(-50%,-50%) scale(1); }
+    }
+
+    /* ═══════════ PAGE 1 ═══════════ */
+    #page1 {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center; gap: 22px;
+      transition: opacity 1s ease;
+    }
+
+    .title-text {
+      font-size: 1.5rem; color: #7b1040;
+      letter-spacing: 4px;
+      text-shadow: 0 2px 12px rgba(255,150,180,0.8);
+      animation: titleFloat 4s ease-in-out infinite;
+    }
+    @keyframes titleFloat {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-6px); }
+    }
+
+    /* ── Photo wrapper: 4 ring layers ── */
+    .photo-wrapper {
+      position: relative;
+      width: 260px; height: 260px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Ring 1 – spinning conic border */
+    .ring1 {
+      position: absolute; inset: -8px; border-radius: 50%;
+      background: conic-gradient(
+        #ff4d8d, #ff99bb, #fff0f5, #ff4d8d,
+        #ffaacc, #fff0f5, #ff4d8d
+      );
+      animation: spin1 3s linear infinite;
+    }
+    @keyframes spin1 { to { transform: rotate(360deg); } }
+
+    /* Ring 2 – counter-rotating dashed glow */
+    .ring2 {
+      position: absolute; inset: -16px; border-radius: 50%;
+      border: 3px dashed rgba(255,100,150,0.4);
+      animation: spin2 6s linear infinite;
+    }
+    @keyframes spin2 { to { transform: rotate(-360deg); } }
+
+    /* Ring 3 – orbiting hearts */
+    .orbit {
+      position: absolute; inset: 0; border-radius: 50%;
+      animation: spin1 5s linear infinite;
+    }
+    .orbit span {
+      position: absolute;
+      font-size: 1.1rem;
+      top: -14px; left: 50%; transform: translateX(-50%);
+      filter: drop-shadow(0 0 4px rgba(255,80,130,0.8));
+    }
+
+    /* Ring 4 – outer shimmer */
+    .ring4 {
+      position: absolute; inset: -24px; border-radius: 50%;
+      background: radial-gradient(circle, transparent 50%, rgba(255,120,180,0.15) 100%);
+      animation: glowPulse 2.5s ease-in-out infinite;
+    }
+    @keyframes glowPulse {
+      0%,100% { box-shadow: 0 0 20px 4px rgba(255,100,150,0.2); }
+      50%      { box-shadow: 0 0 50px 12px rgba(255,100,150,0.45); }
+    }
+
+    /* The actual photo */
+    .photo-wrapper img.main-photo {
+      position: relative; z-index: 2;
+      width: 240px; height: 240px;
+      object-fit: cover; border-radius: 50%;
+      border: 5px solid #fff;
+      animation: imgMorph 8s ease-in-out infinite;
+      transition: transform 0.3s ease;
+    }
+    .photo-wrapper:hover img.main-photo { transform: scale(1.05); }
+
+    /* Continuous color & shadow breathing */
+    @keyframes imgMorph {
+      0%   { filter: brightness(1)   saturate(1)   drop-shadow(0 0 18px #ff4d8d88); }
+      25%  { filter: brightness(1.08) saturate(1.15) drop-shadow(0 0 40px #e91e8cbb); }
+      50%  { filter: brightness(1.05) saturate(1.1)  drop-shadow(0 0 55px #ff80abcc); }
+      75%  { filter: brightness(1.1)  saturate(1.2)  drop-shadow(0 0 35px #ff4d8daa); }
+      100% { filter: brightness(1)   saturate(1)   drop-shadow(0 0 18px #ff4d8d88); }
+    }
+
+    /* Sparkle particles around photo */
+    .sparkle {
+      position: absolute; pointer-events: none; z-index: 3;
+      font-size: 0.9rem;
+      animation: sparklePop ease-in-out infinite;
+    }
+    @keyframes sparklePop {
+      0%,100% { opacity: 0; transform: scale(0.5) translate(0,0); }
+      50%      { opacity: 1; transform: scale(1.2) translate(var(--tx), var(--ty)); }
+    }
+
+    .hint {
+      color: #7b1040; font-size: 1.1rem;
+      letter-spacing: 3px;
+      text-shadow: 0 1px 8px rgba(255,100,150,0.5);
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.25; }
+    }
+
+    /* ═══════════ PAGE 2 ═══════════ */
+    #page2 {
+      display: none; position: fixed; inset: 0;
+      background: radial-gradient(ellipse at 50% 40%, #ffd6e7 0%, #ffb3cc 60%, #ff8fab 100%);
+      z-index: 10;
+      flex-direction: column; align-items: center; justify-content: flex-start;
+      padding: 50px 20px 70px; overflow-y: auto;
+    }
+
+    #page2 .petal {
+      position: fixed; top: -30px; font-size: 1.4rem;
+      pointer-events: none;
+      animation: petalFall linear infinite; opacity: 0; z-index: 0;
+    }
+    @keyframes petalFall {
+      0%   { transform: translateY(0) rotate(0deg) translateX(0); opacity: 0; }
+      5%   { opacity: 1; }
+      90%  { opacity: 0.6; }
+      100% { transform: translateY(110vh) rotate(360deg) translateX(60px); opacity: 0; }
+    }
+
+    /* Message card */
+    .message-box {
+      position: relative; z-index: 5;
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,180,210,0.8);
+      border-radius: 24px; padding: 44px 48px;
+      max-width: 560px; width: 100%; text-align: center;
+      box-shadow:
+        0 0 0 1px rgba(255,100,150,0.15),
+        0 8px 32px rgba(255,100,150,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+      margin-bottom: 44px;
+      animation: cardAppear 1.2s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes cardAppear {
+      from { opacity:0; transform:translateY(40px) scale(0.9); }
+      to   { opacity:1; transform:translateY(0) scale(1); }
+    }
+    .message-box::before { content:'🌸'; position:absolute; font-size:1.6rem; opacity:0.5; top:12px; left:16px; }
+    .message-box::after  { content:'🌸'; position:absolute; font-size:1.6rem; opacity:0.5; bottom:12px; right:16px; }
+
+    /* Typed header */
+    .msg-header {
+      font-size: 1.1rem; color: #ad1457;
+      margin-bottom: 24px; letter-spacing: 3px;
+      min-height: 1.6em;
+    }
+
+    .divider {
+      width: 60%; height: 1px;
+      background: linear-gradient(to right, transparent, #f48fb1, transparent);
+      margin: 20px auto; opacity: 0;
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    /* Typewriter body – each char is a <span> */
+    .msg-body {
+      font-size: 1.25rem; line-height: 2.5; color: #6d0026;
+      text-shadow: 0 1px 4px rgba(255,150,180,0.3);
+      min-height: 6em;
+    }
+    .msg-body .char {
+      display: inline;
+      opacity: 0;
+      animation: charPop 0.25s ease forwards;
+    }
+    /* newline span */
+    .msg-body .nl { display: block; height: 0; }
+
+    @keyframes charPop {
+      0%   { opacity: 0; transform: translateY(6px) scale(0.7); }
+      60%  { opacity: 1; transform: translateY(-2px) scale(1.15); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Typed sign */
+    .msg-sign {
+      margin-top: 24px; font-size: 1.05rem;
+      color: #ad1457; letter-spacing: 2px;
+      min-height: 1.6em;
+    }
+
+    @keyframes fadeIn {
+      from { opacity:0; } to { opacity:1; }
+    }
+
+    /* ── Gallery ── */
+    .gallery-title {
+      position: relative; z-index: 5;
+      font-size: 1.1rem; color: #7b1040;
+      letter-spacing: 4px; margin-bottom: 18px;
+      opacity: 0; animation: fadeIn 0.8s ease forwards;
+    }
+    .gallery {
+      position: relative; z-index: 5;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(155px,1fr));
+      gap: 22px; max-width: 660px; width: 100%;
+    }
+
+    /* Card wrapper — carries spinning border + glow + float */
+    .g-card {
+      position: relative;
+      border-radius: 20px;
+      padding: 3px;          /* space for conic border */
+      cursor: pointer;
+      opacity: 0;
+    }
+
+    /* Spinning conic gradient border */
+    .g-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: 20px;
+      background: conic-gradient(from 0deg, var(--ca), var(--cb), #fff8fb, var(--ca));
+      animation: spinBorder 3s linear infinite;
+      z-index: 0;
+    }
+
+    /* Pulsing outer glow */
+    .g-card::after {
+      content: '';
+      position: absolute; inset: -5px;
+      border-radius: 25px;
+      box-shadow: 0 0 18px 4px var(--cg);
+      animation: glowBreath 2.5s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes glowBreath {
+      0%,100% { opacity: 0.35; transform: scale(0.98); }
+      50%      { opacity: 1;    transform: scale(1.02); }
+    }
+
+    /* Inner clip (overflow hidden stays here, not on card) */
+    .g-inner {
+      position: relative; z-index: 1;
+      border-radius: 17px;
+      overflow: hidden;
+      aspect-ratio: 1;
+      background: #ffd6e7;
+    }
+
+    /* Ken Burns on the image */
+    .g-inner img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+      transform-origin: center;
+    }
+
+    /* Light-glare sweep */
+    .g-inner .shine {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        115deg,
+        transparent 25%,
+        rgba(255,255,255,0.55) 50%,
+        transparent 75%
+      );
+      transform: translateX(-160%);
+      animation: shineSweep 5s ease-in-out infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+    @keyframes shineSweep {
+      0%,35%   { transform: translateX(-160%); }
+      55%,100% { transform: translateX(160%);  }
+    }
+
+    /* Float + pop-in per card (transform doesn't conflict: popIn ends at rotate(--rot), cardFloat continues from there) */
+    @keyframes popIn {
+      from { opacity:0; transform: translateY(28px) scale(0.6) rotate(-6deg); }
+      to   { opacity:1; transform: translateY(0)    scale(1)   rotate(var(--rot)); }
+    }
+    @keyframes cardFloat {
+      0%,100% { transform: translateY(0)   rotate(var(--rot)); }
+      50%     { transform: translateY(-9px) rotate(var(--rot)); }
+    }
+
+    /* Ken Burns keyframe variants */
+    @keyframes kb1 { from{transform:scale(1.0) translate(0,0)}      to{transform:scale(1.15) translate(-4%,-3%)} }
+    @keyframes kb2 { from{transform:scale(1.15) translate(4%,-2%)}  to{transform:scale(1.0)  translate(-2%, 3%)} }
+    @keyframes kb3 { from{transform:scale(1.0)  translate(-3%, 2%)} to{transform:scale(1.14) translate( 4%,-3%)} }
+    @keyframes kb4 { from{transform:scale(1.12) translate( 2%, 3%)} to{transform:scale(1.0)  translate(-3%,-2%)} }
+    @keyframes kb5 { from{transform:scale(1.0)  translate( 3%,-3%)} to{transform:scale(1.15) translate(-4%, 4%)} }
+
+    /* ── Per-card color + timing ── */
+    .g-card:nth-child(1) {
+      --ca:#ff4d8d; --cb:#ffaacc; --cg:rgba(255,77,141,0.55); --rot:-2deg;
+      animation: popIn 0.7s cubic-bezier(0.34,1.56,0.64,1) 1.8s both,
+                 cardFloat 3.2s ease-in-out 2.5s infinite;
+    }
+    .g-card:nth-child(1) img   { animation: kb1 9s  ease-in-out 2.5s infinite alternate; }
+    .g-card:nth-child(1) .shine{ animation-delay: 2.6s; }
+
+    .g-card:nth-child(2) {
+      --ca:#ff80ab; --cb:#ffd6e7; --cg:rgba(255,128,171,0.5); --rot:1.2deg;
+      animation: popIn 0.7s cubic-bezier(0.34,1.56,0.64,1) 2.0s both,
+                 cardFloat 2.8s ease-in-out 2.7s infinite;
+    }
+    .g-card:nth-child(2) img   { animation: kb2 10s ease-in-out 2.7s infinite alternate; }
+    .g-card:nth-child(2) .shine{ animation-delay: 3.6s; }
+
+    .g-card:nth-child(3) {
+      --ca:#e91e8c; --cb:#ff80cc; --cg:rgba(233,30,140,0.45); --rot:-0.8deg;
+      animation: popIn 0.7s cubic-bezier(0.34,1.56,0.64,1) 2.2s both,
+                 cardFloat 3.5s ease-in-out 2.9s infinite;
+    }
+    .g-card:nth-child(3) img   { animation: kb3 8s  ease-in-out 2.9s infinite alternate; }
+    .g-card:nth-child(3) .shine{ animation-delay: 4.4s; }
+
+    .g-card:nth-child(4) {
+      --ca:#ff6699; --cb:#ffb3cc; --cg:rgba(255,102,153,0.5); --rot:2deg;
+      animation: popIn 0.7s cubic-bezier(0.34,1.56,0.64,1) 2.4s both,
+                 cardFloat 3.0s ease-in-out 3.1s infinite;
+    }
+    .g-card:nth-child(4) img   { animation: kb4 11s ease-in-out 3.1s infinite alternate; }
+    .g-card:nth-child(4) .shine{ animation-delay: 5.2s; }
+
+    .g-card:nth-child(5) {
+      --ca:#c2185b; --cb:#f48fb1; --cg:rgba(194,24,91,0.45); --rot:-1.2deg;
+      animation: popIn 0.7s cubic-bezier(0.34,1.56,0.64,1) 2.6s both,
+                 cardFloat 3.8s ease-in-out 3.3s infinite;
+    }
+    .g-card:nth-child(5) img   { animation: kb5 9s  ease-in-out 3.3s infinite alternate; }
+    .g-card:nth-child(5) .shine{ animation-delay: 6.0s; }
+
+    /* Hover: lift + brighten */
+    .g-card:hover { z-index: 10; }
+    .g-card:hover .g-inner img {
+      filter: brightness(1.08) saturate(1.15);
+      transition: filter 0.3s ease;
+    }
+    .g-card:hover::after { opacity: 1 !important; animation: none; box-shadow: 0 0 35px 10px var(--cg); }
+
+    /* Lightbox */
+    #lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+      z-index: 100; align-items: center; justify-content: center; cursor: pointer;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox img {
+      max-width: 88vw; max-height: 88vh;
+      border-radius: 16px;
+      box-shadow: 0 0 60px rgba(255,100,150,0.6);
+      animation: zoomIn 0.35s ease;
+    }
+    @keyframes zoomIn {
+      from { transform:scale(0.7); opacity:0; }
+      to   { transform:scale(1); opacity:1; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bokeh" id="bokeh"></div>
+  <div class="heart-container" id="hearts"></div>
+
+  <!-- ═══ PAGE 1 ═══ -->
+  <div id="page1">
+    <p class="title-text">❤ 有一封信，写给你 ❤</p>
+
+    <div class="photo-wrapper" onclick="reveal(event)">
+      <!-- Layers -->
+      <div class="ring4"></div>
+      <div class="ring2"></div>
+      <div class="ring1"></div>
+
+      <!-- Orbiting hearts (6 evenly spaced) -->
+      <div class="orbit" style="animation-duration:5s">
+        <span style="transform:translateX(-50%) rotate(0deg)   translateY(-138px) rotate(0deg)">💖</span>
+      </div>
+      <div class="orbit" style="animation-duration:5s;animation-delay:-0.83s">
+        <span style="transform:translateX(-50%) rotate(0deg)   translateY(-138px) rotate(0deg)">🌸</span>
+      </div>
+      <div class="orbit" style="animation-duration:5s;animation-delay:-1.67s">
+        <span style="transform:translateX(-50%) rotate(0deg)   translateY(-138px) rotate(0deg)">✨</span>
+      </div>
+      <div class="orbit" style="animation-duration:5s;animation-delay:-2.5s">
+        <span style="transform:translateX(-50%) rotate(0deg)   translateY(-138px) rotate(0deg)">💗</span>
+      </div>
+      <div class="orbit" style="animation-duration:5s;animation-delay:-3.33s">
+        <span style="transform:translateX(-50%) rotate(0deg)   translateY(-138px) rotate(0deg)">🌷</span>
+      </div>
+      <div class="orbit" style="animation-duration:5s;animation-delay:-4.17s">
+        <span style="transform:translateX(-50%) rotate(0deg)   translateY(-138px) rotate(0deg)">💕</span>
+      </div>
+
+      <!-- Sparkles at fixed positions -->
+      <span class="sparkle" style="top:10px;left:20px;--tx:-8px;--ty:-10px;animation-duration:2.1s">✦</span>
+      <span class="sparkle" style="top:10px;right:20px;--tx:8px;--ty:-10px;animation-duration:2.6s;animation-delay:0.5s">✦</span>
+      <span class="sparkle" style="bottom:10px;left:20px;--tx:-8px;--ty:10px;animation-duration:2.3s;animation-delay:1s">✦</span>
+      <span class="sparkle" style="bottom:10px;right:20px;--tx:8px;--ty:10px;animation-duration:2.8s;animation-delay:0.3s">✦</span>
+      <span class="sparkle" style="top:50%;left:-5px;--tx:-12px;--ty:0;animation-duration:2.4s;animation-delay:0.8s">✧</span>
+      <span class="sparkle" style="top:50%;right:-5px;--tx:12px;--ty:0;animation-duration:2.2s;animation-delay:1.3s">✧</span>
+
+      <img class="main-photo" src="imgs/img.jpeg" alt="照片" />
+    </div>
+
+    <span class="hint">🌸 点击照片，解开秘密 🌸</span>
+  </div>
+
+  <!-- ═══ PAGE 2 ═══ -->
+  <div id="page2">
+    <div class="message-box">
+      <p class="msg-header" id="msgHeader"></p>
+      <div class="divider"></div>
+      <p class="msg-body"  id="msgBody"></p>
+      <p class="msg-sign"  id="msgSign"></p>
+    </div>
+
+    <p class="gallery-title" id="galleryTitle"></p>
+    <div class="gallery">
+      <div class="g-card"><div class="g-inner"><img src="imgs/img1.jpeg" alt="" /><div class="shine"></div></div></div>
+      <div class="g-card"><div class="g-inner"><img src="imgs/img2.jpeg" alt="" /><div class="shine"></div></div></div>
+      <div class="g-card"><div class="g-inner"><img src="imgs/img3.jpeg" alt="" /><div class="shine"></div></div></div>
+      <div class="g-card"><div class="g-inner"><img src="imgs/img4.jpeg" alt="" /><div class="shine"></div></div></div>
+      <div class="g-card"><div class="g-inner"><img src="imgs/img5.jpeg" alt="" /><div class="shine"></div></div></div>
+    </div>
+  </div>
+
+  <div id="lightbox" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="" />
+  </div>
+
+  <audio id="bgm" src="music.mp3" preload="auto"></audio>
+
+  <script>
+    /* ── Bokeh ── */
+    const bokeh = document.getElementById('bokeh');
+    for (let i = 0; i < 35; i++) {
+      const d = document.createElement('div');
+      d.classList.add('dot');
+      const s = 4 + Math.random() * 18;
+      d.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-duration:${2.5+Math.random()*4}s;animation-delay:${Math.random()*4}s;`;
+      bokeh.appendChild(d);
+    }
+
+    /* ── Floating hearts ── */
+    const heartsEl = document.getElementById('hearts');
+    const EMOJIS = ['❤️','🌸','💕','💗','🌷','✨','💖','🍀','🌺','💞'];
+    function spawnHeart() {
+      const el = document.createElement('span');
+      el.classList.add('heart');
+      el.textContent = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.fontSize = (1.0 + Math.random() * 1.8) + 'rem';
+      const dur = 5 + Math.random() * 7;
+      el.style.animationDuration = dur + 's';
+      el.style.animationDelay = Math.random() * 1.5 + 's';
+      heartsEl.appendChild(el);
+      setTimeout(() => el.remove(), (dur + 2) * 1000);
+    }
+    setInterval(spawnHeart, 350);
+    for (let i = 0; i < 15; i++) spawnHeart();
+
+    /* ── Petals (page 2) ── */
+    function spawnPetal(parent) {
+      const el = document.createElement('span');
+      el.classList.add('petal');
+      el.textContent = ['🌸','🌺','🌷'][Math.floor(Math.random()*3)];
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.fontSize = (0.9 + Math.random() * 1.2) + 'rem';
+      const dur = 6 + Math.random() * 8;
+      el.style.animationDuration = dur + 's';
+      el.style.animationDelay = Math.random() * 2 + 's';
+      parent.appendChild(el);
+      setTimeout(() => el.remove(), (dur + 3) * 1000);
+    }
+
+    /* ── Ripple ── */
+    document.addEventListener('click', e => {
+      const r = document.createElement('div');
+      r.classList.add('ripple');
+      r.style.left = e.clientX + 'px';
+      r.style.top  = e.clientY + 'px';
+      document.body.appendChild(r);
+      setTimeout(() => r.remove(), 900);
+    });
+
+    /* ─────────────────────────────────────────
+       Typewriter: xuất hiện từng chữ
+    ───────────────────────────────────────── */
+    /**
+     * type(el, text, startDelay, charDelay)
+     * Wraps each character in a <span class="char"> with staggered animation-delay.
+     * Newlines become <span class="nl"><br></span>.
+     */
+    function type(el, text, startDelay = 0, charDelay = 60) {
+      el.innerHTML = '';
+      let visible = false;
+
+      [...text].forEach((ch, i) => {
+        const delay = startDelay + i * charDelay;
+
+        if (!visible) {
+          // make element visible when first char starts appearing
+          setTimeout(() => { el.style.opacity = '1'; }, delay);
+          visible = true;
+        }
+
+        if (ch === '\n') {
+          const br = document.createElement('br');
+          // schedule insertion
+          const placeholder = document.createElement('span');
+          placeholder.classList.add('nl');
+          placeholder.dataset.delay = delay;
+          el.appendChild(placeholder);
+          setTimeout(() => {
+            placeholder.replaceWith(document.createElement('br'));
+          }, delay);
+        } else {
+          const span = document.createElement('span');
+          span.classList.add('char');
+          span.textContent = ch;
+          span.style.animationDelay = delay + 'ms';
+          el.appendChild(span);
+        }
+      });
+
+      // return total time (ms) when typing finishes
+      return startDelay + text.length * charDelay + 300;
+    }
+
+    /* ── Reveal page 2 ── */
+    function reveal(e) {
+      const p1 = document.getElementById('page1');
+      p1.style.opacity = '0';
+
+      setTimeout(() => {
+        p1.style.display = 'none';
+        const p2 = document.getElementById('page2');
+        p2.style.display = 'flex';
+
+        /* gallery animation delay based on typing end */
+        const galleryDelay = startTyping();
+
+        document.getElementById('galleryTitle').style.animationDelay = (galleryDelay / 1000 - 0.3) + 's';
+
+        /* petals */
+        const petalInt = setInterval(() => spawnPetal(p2), 600);
+        setTimeout(() => clearInterval(petalInt), 30000);
+      }, 900);
+
+      /* music */
+      const audio = document.getElementById('bgm');
+      audio.currentTime = 40;
+      audio.play().catch(() => {});
+
+      /* lightbox */
+      document.querySelectorAll('.g-card').forEach(card => {
+        card.addEventListener('click', () => openLightbox(card.querySelector('img').src));
+      });
+    }
+
+    function startTyping() {
+      const header = '致　王思杰、';
+      const body   = '风起花落，月残梦醒；\n有别离之日，亦有重逢之时。\n愿你一生安然无恙，岁月静好。\n永远是朋友。';
+      const sign   = '——　Haruto　🌙✨';
+      const gallery = '✦ 我们的回忆 ✦';
+
+      const CHAR_MS  = 80;   // ms per character
+      const LINE_GAP = 300;  // extra pause between sections
+
+      let cursor = 400; // initial delay (card appear animation)
+
+      cursor = type(document.getElementById('msgHeader'), header, cursor, CHAR_MS);
+      cursor += LINE_GAP;
+      cursor = type(document.getElementById('msgBody'),   body,   cursor, CHAR_MS);
+      cursor += LINE_GAP;
+      cursor = type(document.getElementById('msgSign'),   sign,   cursor, CHAR_MS);
+      cursor += LINE_GAP;
+      type(document.getElementById('galleryTitle'), gallery, cursor, 80);
+
+      return cursor + gallery.length * 80 + 400; // when gallery should appear
+    }
+
+    /* ── Lightbox ── */
+    function openLightbox(src) {
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox').classList.add('open');
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+  </script>
+</body>
+</html>
